@@ -5,39 +5,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const start = document.querySelector('#start');
   const play = document.querySelector('#play');
+  // Define these outside so they're accessible in all functions
+  const resultPara = document.querySelector('.result');
+  const scorePara = document.querySelector('.score');
+  
+  // Grab the buttons once
+  const rock = document.querySelector('#rock');
+  const paper = document.querySelector('#paper');
+  const scissors = document.querySelector('#scissors');
+
+  // Add event listeners to the game buttons only once
+  rock.addEventListener('click', () => handleChoice('rock'));
+  paper.addEventListener('click', () => handleChoice('paper'));
+  scissors.addEventListener('click', () => handleChoice('scissors'));
 
   start.addEventListener('click', () => {
     if (start.textContent === 'Restart') {
       resetGame();
     }
-
-    start.textContent = 'Start Game';
-    play.innerHTML = '';
-
-    const rock = document.createElement('button');
-    const paper = document.createElement('button');
-    const scissors = document.createElement('button');
-
-    rock.textContent = 'Rock';
-    paper.textContent = 'Paper';
-    scissors.textContent = 'Scissors';
-
-    rock.className = 'humanchoice';
-    paper.className = 'humanchoice';
-    scissors.className = 'humanchoice';
-    const buttonwrapper = document.createElement('div');
-    buttonwrapper.className = '.wrapper';
-
-    buttonwrapper.appendChild(rock);
-    buttonwrapper.appendChild(paper);
-    buttonwrapper.appendChild(scissors);
-
-    play.appendChild(buttonwrapper);
-
-    rock.addEventListener('click', () => playRound('rock'));
-    paper.addEventListener('click', () => playRound('paper'));
-    scissors.addEventListener('click', () => playRound('scissors'));
+    // Clear previous results instead of wiping out the whole container
+    resultPara.textContent = '';
+    scorePara.textContent = '';
   });
+
+  function handleChoice(humanChoice) {
+    if (roundsPlayed >= 5) {
+      resetGame();
+      return;
+    }
+    playRound(humanChoice);
+  }
 
   function getComputerChoice() {
     const options = ['rock', 'paper', 'scissors'];
@@ -45,36 +42,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function playRound(humanChoice) {
-    if (roundsPlayed >= 5) {
-      displayFinalResult();
-      return;
-    }
-
     const computerChoice = getComputerChoice();
-    const resultPara = document.createElement('p');
-    resultPara.textContent = `You chose ${humanChoice}, Computer chose ${computerChoice}`;
-    play.appendChild(resultPara);
+    let roundResult = '';
 
     if (humanChoice === computerChoice) {
-      resultPara.textContent += " - It's a tie!";
+      roundResult = "It's a tie, play again!";
     } else if (
       (humanChoice === 'rock' && computerChoice === 'scissors') ||
       (humanChoice === 'scissors' && computerChoice === 'paper') ||
       (humanChoice === 'paper' && computerChoice === 'rock')
     ) {
       humanScore++;
-      resultPara.textContent += " - You win this round!";
+      roundResult = `You win, ${humanChoice} beats ${computerChoice}`;
     } else {
       computerScore++;
-      resultPara.textContent += " - Computer wins this round!";
+      roundResult = `You lost, ${humanChoice} is beaten by ${computerChoice}`;
     }
 
     roundsPlayed++;
-    const scorePara = document.createElement('p');
-    scorePara.textContent = `Scores => You: ${humanScore}, Computer: ${computerScore}`;
-    play.appendChild(scorePara);
+    resultPara.textContent = roundResult;
+    scorePara.textContent = `Scores - You: ${humanScore}, Computer: ${computerScore}`;
 
     if (roundsPlayed === 5) {
+      displayFinalResult();
       start.textContent = 'Restart';
     }
   }
@@ -95,7 +85,13 @@ document.addEventListener('DOMContentLoaded', () => {
     humanScore = 0;
     computerScore = 0;
     roundsPlayed = 0;
-    play.innerHTML = '';
+    resultPara.textContent = '';
+    scorePara.textContent = '';
+    // Remove the final result paragraph if it exists.
+    const finalPara = play.querySelector('p:last-child');
+    if (finalPara) {
+      play.removeChild(finalPara);
+    }
     start.textContent = 'Start Game';
   }
 });
